@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+pydantic
+langchain
+langchain-openai
+langchain-anthropic
+chromadb
+faiss-cpu
+sentence-transformers
+python-dotenv
+requests
+kafka-python
+neo4j

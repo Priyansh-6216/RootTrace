@@ -1,0 +1,28 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build
+**/target/
+**/node_modules/
+**/dist/
+**/build/
+.gradle/
+
+# Python
+**/__pycache__/
+**/.venv/
+**/venv/
+.env
+
+# Docker
+**/data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
