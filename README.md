@@ -13,9 +13,9 @@ RootTrace is built with a distributed architecture to handle large-scale observa
 
 ## 📅 7-Day Build Roadmap
 
-- **Day 1: Project Setup + Microservices Foundation** (Current)
-- **Day 2: Log Ingestion + Search System**
-- **Day 3: Kafka Event Replay + Streaming Pipeline**
+- **Day 1: Project Setup + Microservices Foundation** (Done)
+- **Day 2: Log Ingestion + Search System** (Done)
+- **Day 3: Kafka Event Replay + Streaming Pipeline** (Next)
 - **Day 4: Distributed Trace Graph with Neo4j**
 - **Day 5: AI Root Cause Analysis Engine**
 - **Day 6: Incident Report + GitHub Fix Suggestion**

@@ -1,12 +1,13 @@
 import { LayoutDashboard, FileText, Share2, Brain, AlertTriangle, Settings, Terminal } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', active: true },
-    { icon: FileText, label: 'Log Explorer' },
-    { icon: Share2, label: 'Trace Graph' },
-    { icon: AlertTriangle, label: 'Incidents' },
-    { icon: Brain, label: 'AI Analysis' },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+    { icon: FileText, label: 'Log Explorer', path: '/logs' },
+    { icon: Share2, label: 'Trace Graph', path: '/traces' },
+    { icon: AlertTriangle, label: 'Incidents', path: '/incidents' },
+    { icon: Brain, label: 'AI Analysis', path: '/ai' },
   ];
 
   return (
@@ -20,17 +21,20 @@ const Sidebar = () => {
 
       <nav className="flex-1 space-y-2">
         {menuItems.map((item) => (
-          <button
+          <NavLink
             key={item.label}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-              item.active 
-                ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' 
-                : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
-            }`}
+            to={item.path}
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                isActive 
+                  ? 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+              }`
+            }
           >
             <item.icon size={20} />
             <span className="font-medium">{item.label}</span>
-          </button>
+          </NavLink>
         ))}
       </nav>
 
