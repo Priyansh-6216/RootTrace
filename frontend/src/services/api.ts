@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { LogEntry } from '../types/Log';
+import type { LogEntry } from '../types/Log';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 

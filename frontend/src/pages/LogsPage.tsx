@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, Download, RefreshCcw, AlertCircle, Info, AlertTriangle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Filter, Download, RefreshCcw, AlertCircle, Info, AlertTriangle, Play, Pause } from 'lucide-react';
 import { logService } from '../services/api';
-import { LogEntry } from '../types/Log';
+import type { LogEntry } from '../types/Log';
+import { useLogStream } from '../hooks/useLogStream';
 
 const LogsPage = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLive, setIsLive] = useState(false);
+  const { liveLogs, connect, disconnect, clearLiveLogs } = useLogStream();
   const [searchParams, setSearchParams] = useState({
     serviceName: '',
     logLevel: '',
@@ -25,8 +28,21 @@ const LogsPage = () => {
   };
 
   useEffect(() => {
-    fetchLogs();
-  }, []);
+    if (!isLive) {
+      fetchLogs();
+    }
+  }, [isLive]);
+
+  const toggleLiveStream = () => {
+    if (isLive) {
+      disconnect();
+      setIsLive(false);
+    } else {
+      clearLiveLogs();
+      connect();
+      setIsLive(true);
+    }
+  };
 
   const getLevelColor = (level: string) => {
     switch (level.toUpperCase()) {
@@ -55,21 +71,43 @@ const LogsPage = () => {
     }
   };
 
+  const displayedLogs = isLive ? liveLogs : logs;
+
   return (
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">Log Explorer</h2>
+          <h2 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+            Log Explorer
+            {isLive && (
+              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                Live
+              </span>
+            )}
+          </h2>
           <p className="text-slate-400 mt-1">Search and analyze logs across all your microservices.</p>
         </div>
         <div className="flex gap-3">
           <button 
-            onClick={fetchLogs}
-            className="glass-button flex items-center gap-2"
+            onClick={toggleLiveStream}
+            className={`glass-button flex items-center gap-2 ${isLive ? 'bg-emerald-600/20 text-emerald-400 border-emerald-500/30' : ''}`}
           >
-            <RefreshCcw size={18} className={loading ? 'animate-spin' : ''} />
-            Refresh
+            {isLive ? <Pause size={18} /> : <Play size={18} />}
+            {isLive ? 'Pause Stream' : 'Live Stream'}
           </button>
+          {!isLive && (
+            <button 
+              onClick={fetchLogs}
+              className="glass-button flex items-center gap-2"
+            >
+              <RefreshCcw size={18} className={loading ? 'animate-spin' : ''} />
+              Refresh
+            </button>
+          )}
           <button className="glass-button flex items-center gap-2 bg-indigo-600/20 text-indigo-400 border-indigo-500/30">
             <Download size={18} />
             Export
@@ -77,32 +115,34 @@ const LogsPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3 glass-card p-4 flex items-center gap-3">
-          <Search className="text-slate-500" size={20} />
-          <input 
-            type="text" 
-            placeholder="Search logs message..."
-            className="bg-transparent border-none outline-none text-slate-200 w-full"
-            value={searchParams.message}
-            onChange={(e) => setSearchParams({ ...searchParams, message: e.target.value })}
-            onKeyDown={(e) => e.key === 'Enter' && fetchLogs()}
-          />
+      {!isLive && (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          <div className="lg:col-span-3 glass-card p-4 flex items-center gap-3">
+            <Search className="text-slate-500" size={20} />
+            <input 
+              type="text" 
+              placeholder="Search logs message..."
+              className="bg-transparent border-none outline-none text-slate-200 w-full"
+              value={searchParams.message}
+              onChange={(e) => setSearchParams({ ...searchParams, message: e.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && fetchLogs()}
+            />
+          </div>
+          <div className="glass-card p-4 flex items-center gap-3">
+            <Filter className="text-slate-500" size={20} />
+            <select 
+              className="bg-transparent border-none outline-none text-slate-200 w-full appearance-none"
+              value={searchParams.logLevel}
+              onChange={(e) => setSearchParams({ ...searchParams, logLevel: e.target.value })}
+            >
+              <option value="" className="bg-slate-900">All Levels</option>
+              <option value="INFO" className="bg-slate-900">Info</option>
+              <option value="WARN" className="bg-slate-900">Warning</option>
+              <option value="ERROR" className="bg-slate-900">Error</option>
+            </select>
+          </div>
         </div>
-        <div className="glass-card p-4 flex items-center gap-3">
-          <Filter className="text-slate-500" size={20} />
-          <select 
-            className="bg-transparent border-none outline-none text-slate-200 w-full appearance-none"
-            value={searchParams.logLevel}
-            onChange={(e) => setSearchParams({ ...searchParams, logLevel: e.target.value })}
-          >
-            <option value="" className="bg-slate-900">All Levels</option>
-            <option value="INFO" className="bg-slate-900">Info</option>
-            <option value="WARN" className="bg-slate-900">Warning</option>
-            <option value="ERROR" className="bg-slate-900">Error</option>
-          </select>
-        </div>
-      </div>
+      )}
 
       <div className="glass-card overflow-hidden">
         <div className="overflow-x-auto">
@@ -117,21 +157,28 @@ const LogsPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {loading ? (
+              {!isLive && loading ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-20 text-center text-slate-500">
                     <RefreshCcw className="animate-spin inline-block mr-2" />
                     Loading logs...
                   </td>
                 </tr>
-              ) : logs.length === 0 ? (
+              ) : isLive && liveLogs.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-20 text-center text-slate-500">
+                    <RefreshCcw className="animate-spin inline-block mr-2" />
+                    Waiting for live logs...
+                  </td>
+                </tr>
+              ) : displayedLogs.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-20 text-center text-slate-500">
                     No logs found matching your criteria.
                   </td>
                 </tr>
               ) : (
-                logs.map((log, index) => (
+                displayedLogs.map((log, index) => (
                   <tr key={log.id || index} className="hover:bg-white/5 transition-colors group">
                     <td className="px-6 py-4 text-sm text-slate-400 whitespace-nowrap font-mono">
                       {formatTimestamp(log.timestamp)}

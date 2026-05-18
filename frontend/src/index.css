@@ -15,11 +15,11 @@ body {
 }
 
 .glass-card {
-  @apply glass rounded-xl shadow-2xl;
+  @apply bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl shadow-2xl;
 }
 
 .glass-button {
-  @apply glass hover:bg-white/10 px-4 py-2 rounded-lg transition-all active:scale-95;
+  @apply bg-white/5 backdrop-blur-lg border border-white/10 hover:bg-white/10 px-4 py-2 rounded-lg transition-all active:scale-95;
 }
 
 /* Custom scrollbar */

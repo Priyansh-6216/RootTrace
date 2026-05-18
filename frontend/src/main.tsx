@@ -1,5 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+
+if (typeof window !== 'undefined') {
+  (window as any).global = window;
+}
 import './index.css'
 import App from './App.tsx'
 

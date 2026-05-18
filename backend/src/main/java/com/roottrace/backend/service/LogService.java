@@ -15,9 +15,12 @@ import java.util.List;
 public class LogService {
 
     private final LogRepository logRepository;
+    private final KafkaProducerService kafkaProducerService;
 
     public List<LogEntry> saveLogs(List<LogEntry> logs) {
-        return logRepository.saveAll(logs);
+        List<LogEntry> savedLogs = logRepository.saveAll(logs);
+        savedLogs.forEach(kafkaProducerService::sendLog);
+        return savedLogs;
     }
 
     public List<LogEntry> searchLogs(String serviceName, String logLevel, String message, 
