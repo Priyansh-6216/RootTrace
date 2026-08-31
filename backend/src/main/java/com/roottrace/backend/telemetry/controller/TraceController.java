@@ -1,7 +1,7 @@
-package com.roottrace.backend.controller;
+package com.roottrace.backend.telemetry.controller;
 
-import com.roottrace.backend.entity.TraceNode;
-import com.roottrace.backend.service.TraceService;
+import com.roottrace.backend.telemetry.entity.TraceNode;
+import com.roottrace.backend.telemetry.service.TraceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/traces")
+@RequestMapping("/api/v1/traces")
 @RequiredArgsConstructor
 public class TraceController {
 

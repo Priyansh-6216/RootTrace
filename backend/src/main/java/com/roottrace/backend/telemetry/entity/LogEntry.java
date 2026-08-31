@@ -1,4 +1,4 @@
-package com.roottrace.backend.entity;
+package com.roottrace.backend.telemetry.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

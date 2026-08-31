@@ -1,6 +1,6 @@
-package com.roottrace.backend.repository;
+package com.roottrace.backend.telemetry.repository;
 
-import com.roottrace.backend.entity.TraceNode;
+import com.roottrace.backend.telemetry.entity.TraceNode;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
 

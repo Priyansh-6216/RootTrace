@@ -1,6 +1,6 @@
-package com.roottrace.backend.controller;
+package com.roottrace.backend.telemetry.controller;
 
-import com.roottrace.backend.service.LogService;
+import com.roottrace.backend.telemetry.service.LogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import com.roottrace.backend.entity.LogEntry;
+import com.roottrace.backend.telemetry.entity.LogEntry;
 
 @RestController
-@RequestMapping("/api/logs")
+@RequestMapping("/api/v1/logs")
 @RequiredArgsConstructor
 public class LogController {
 

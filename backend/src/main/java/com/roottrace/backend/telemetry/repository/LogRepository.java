@@ -1,6 +1,6 @@
-package com.roottrace.backend.repository;
+package com.roottrace.backend.telemetry.repository;
 
-import com.roottrace.backend.entity.LogEntry;
+import com.roottrace.backend.telemetry.entity.LogEntry;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

@@ -1,7 +1,7 @@
-package com.roottrace.backend.service;
+package com.roottrace.backend.telemetry.service;
 
-import com.roottrace.backend.entity.LogEntry;
-import com.roottrace.backend.repository.LogRepository;
+import com.roottrace.backend.telemetry.entity.LogEntry;
+import com.roottrace.backend.telemetry.repository.LogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;

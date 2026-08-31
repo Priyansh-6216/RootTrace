@@ -1,4 +1,4 @@
-package com.roottrace.backend.config;
+package com.roottrace.backend.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

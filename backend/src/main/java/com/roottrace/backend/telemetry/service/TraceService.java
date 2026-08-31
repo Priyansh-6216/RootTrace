@@ -1,7 +1,7 @@
-package com.roottrace.backend.service;
+package com.roottrace.backend.telemetry.service;
 
-import com.roottrace.backend.entity.TraceNode;
-import com.roottrace.backend.repository.TraceNodeRepository;
+import com.roottrace.backend.telemetry.entity.TraceNode;
+import com.roottrace.backend.telemetry.repository.TraceNodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

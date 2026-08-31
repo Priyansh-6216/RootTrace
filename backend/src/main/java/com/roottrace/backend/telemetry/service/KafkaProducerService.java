@@ -1,7 +1,7 @@
-package com.roottrace.backend.service;
+package com.roottrace.backend.telemetry.service;
 
-import com.roottrace.backend.config.KafkaConfig;
-import com.roottrace.backend.entity.LogEntry;
+import com.roottrace.backend.common.config.KafkaConfig;
+import com.roottrace.backend.telemetry.entity.LogEntry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;

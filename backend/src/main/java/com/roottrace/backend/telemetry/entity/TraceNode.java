@@ -1,4 +1,4 @@
-package com.roottrace.backend.entity;
+package com.roottrace.backend.telemetry.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
