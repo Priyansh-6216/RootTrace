@@ -16,9 +16,18 @@ public class LogService {
 
     private final LogRepository logRepository;
     private final KafkaProducerService kafkaProducerService;
+    private final LogRedactionService logRedactionService;
 
     public List<LogEntry> saveLogs(List<LogEntry> logs) {
-        List<LogEntry> savedLogs = logRepository.saveAll(logs);
+        List<LogEntry> toSave = logs.stream()
+                .filter(log -> log.getEventId() == null || !logRepository.existsByEventId(log.getEventId()))
+                .map(log -> {
+                    log.setMessage(logRedactionService.redact(log.getMessage()));
+                    return log;
+                })
+                .toList();
+
+        List<LogEntry> savedLogs = logRepository.saveAll(toSave);
         savedLogs.forEach(kafkaProducerService::sendLog);
         return savedLogs;
     }

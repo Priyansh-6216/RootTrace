@@ -12,4 +12,5 @@ public interface LogRepository extends JpaRepository<LogEntry, Long>, JpaSpecifi
     List<LogEntry> findByServiceName(String serviceName);
     List<LogEntry> findByLogLevel(String logLevel);
     List<LogEntry> findByTraceId(String traceId);
+    boolean existsByEventId(String eventId);
 }

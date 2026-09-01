@@ -20,6 +20,11 @@ public class LogEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
+    private String eventId;
+
+    private String tenantId;
+
     private LocalDateTime timestamp;
 
     private String serviceName;
