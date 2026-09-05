@@ -5,76 +5,89 @@ from typing import List, Optional
 import uvicorn
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-import requests
+from langchain_community.callbacks import get_openai_callback
+import json
 
-app = FastAPI(title="RootTrace AI Worker")
+app = FastAPI(title="RootTrace AI Worker - V2")
+
+class EvidenceModel(BaseModel):
+    id: str
+    type: str
+    description: str
+    sourceId: str
+    strength: float
+
+class RootCauseCandidateModel(BaseModel):
+    id: str
+    hypothesis: str
+    confidenceLevel: str
 
 class IncidentData(BaseModel):
     incidentId: str
-    logs: List[str]
-    traceGraph: Optional[dict] = None
-    metrics: Optional[List[dict]] = None
-    repo_url: Optional[str] = None
-    github_token: Optional[str] = None
+    top_candidates: List[RootCauseCandidateModel]
+    evidence_graph: List[EvidenceModel]
+
+class AiAnalysisResult(BaseModel):
+    incidentId: str
+    human_narrative: str
+    remediation_steps: List[str]
+    estimated_cost_usd: float
+    human_approval_required: bool
 
 @app.get("/")
 async def root():
     return {"message": "RootTrace AI Worker is running"}
 
-@app.post("/analyze")
+@app.post("/analyze", response_model=AiAnalysisResult)
 async def analyze_incident(data: IncidentData):
-    # Day 5: AI RCA Engine
     try:
+        estimated_cost = 0.0
+        human_narrative = ""
+        remediation_steps = []
+
         if os.getenv("OPENAI_API_KEY"):
             llm = ChatOpenAI(model="gpt-4-turbo", temperature=0)
             prompt = ChatPromptTemplate.from_messages([
-                ("system", "You are an expert Site Reliability Engineer. Analyze the following incident logs, traces, and metrics to determine the root cause, confidence score, evidence, and recommended actions. Output JSON."),
-                ("user", "Incident Logs: {logs}\nTraces: {traces}\nMetrics: {metrics}")
+                ("system", "You are an expert Site Reliability Engineer. Explain the root cause of this incident to a human operator. You will be provided with the top deterministic candidates and the evidence graph. Provide a clear narrative explaining WHY the top candidate is the most likely root cause based ONLY on the evidence. Then, provide 2-3 bullet points for remediation. Format the output as JSON with keys: 'narrative' and 'remediation'."),
+                ("user", "Top Candidates: {candidates}\n\nEvidence Graph: {evidence}")
             ])
             chain = prompt | llm
-            # In a real scenario we parse the output, but we mock it below for demo
-            
-        root_cause = "Simulated: Database connection timeout in 'user-service' due to high connection pool usage."
-        evidence = ["Log: TimeoutException getting connection", "Trace: user-service -> database took > 5000ms"]
-        recommended_actions = ["Increase HikariCP max pool size", "Investigate slow queries in user profile fetching"]
+
+            candidates_json = json.dumps([c.model_dump() for c in data.top_candidates])
+            evidence_json = json.dumps([e.model_dump() for e in data.evidence_graph])
+
+            with get_openai_callback() as cb:
+                response = chain.invoke({"candidates": candidates_json, "evidence": evidence_json})
+                estimated_cost = cb.total_cost
+                
+                try:
+                    # Clean up JSON formatting if LLM added markdown blocks
+                    content = response.content.replace("```json", "").replace("```", "").strip()
+                    parsed = json.loads(content)
+                    human_narrative = parsed.get("narrative", "Failed to parse narrative.")
+                    remediation_steps = parsed.get("remediation", ["Manual investigation required."])
+                except Exception as parse_ex:
+                    print(f"JSON Parsing failed: {parse_ex}")
+                    human_narrative = response.content
+                    remediation_steps = ["Review narrative for remediation steps."]
+        else:
+            print("OPENAI_API_KEY not found. Using fallback mock.")
+            # Fallback if no API key is provided
+            top_hypothesis = data.top_candidates[0].hypothesis if data.top_candidates else "Unknown Issue"
+            human_narrative = f"[MOCK] The root cause appears to be: {top_hypothesis}. Evidence indicates a strong correlation."
+            remediation_steps = ["Investigate recent deployments.", "Check database connection pool limits."]
+
+        return AiAnalysisResult(
+            incidentId=data.incidentId,
+            human_narrative=human_narrative,
+            remediation_steps=remediation_steps,
+            estimated_cost_usd=estimated_cost,
+            human_approval_required=True
+        )
             
     except Exception as e:
-        print(f"LLM analysis failed, using fallback: {e}")
-        root_cause = "Database connection timeout in 'user-service'"
-        evidence = ["Log: TimeoutException"]
-        recommended_actions = ["Increase HikariCP max pool size"]
-
-    # Day 6: GitHub Fix Suggestion
-    pr_url = None
-    if data.repo_url and data.github_token:
-        try:
-            headers = {
-                "Authorization": f"token {data.github_token}",
-                "Accept": "application/vnd.github.v3+json"
-            }
-            parts = data.repo_url.rstrip('/').split('/')
-            owner, repo = parts[-2], parts[-1]
-            if repo.endswith('.git'):
-                repo = repo[:-4]
-                
-            issue_data = {
-                "title": f"RootTrace Auto-Fix: Incident {data.incidentId}",
-                "body": f"### Root Cause\n{root_cause}\n\n### Evidence\n{evidence}\n\n### Recommended Actions\n{recommended_actions}\n\n*Generated by RootTrace AI*"
-            }
-            res = requests.post(f"https://api.github.com/repos/{owner}/{repo}/issues", json=issue_data, headers=headers)
-            if res.status_code == 201:
-                pr_url = res.json().get("html_url")
-        except Exception as e:
-            print(f"Failed to create GitHub issue: {e}")
-
-    return {
-        "incidentId": data.incidentId,
-        "rootCause": root_cause,
-        "confidence": 0.95,
-        "evidence": evidence,
-        "recommendedActions": recommended_actions,
-        "githubIssueUrl": pr_url
-    }
+        print(f"LLM analysis failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
