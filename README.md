@@ -1,6 +1,26 @@
-# RootTrace 🚀
+# RootTrace V2 (Production Sprint)
 
-AI-powered production debugging platform for microservices, logs, traces, metrics, and incident root-cause analysis.
+RootTrace is an AI-powered production incident investigation platform that ingests telemetry (logs, metrics, traces), builds a dependency graph, detects incidents, performs evidence-backed root-cause analysis, and automatically generates code fixes with human-in-the-loop approval.
+
+## 🚀 7-Day Production Sprint Complete
+
+We have successfully transformed the MVP into a production-hardened platform:
+
+- **Day 1**: Architecture & Refactoring (Bounded Contexts, SOLID, Profiles).
+- **Day 2**: Telemetry Ingestion Pipeline (Kafka, Idempotency, Secret Redaction).
+- **Day 3**: Incident Detection (Z-score Anomaly Detection) & Service Catalog (Neo4j Graph).
+- **Day 4**: Evidence-Based RCA (Deterministic Scoring Engine).
+- **Day 5**: AI Agent (LangChain, GPT-4, Cost Tracking).
+- **Day 6**: Remediation & GitHub Integration (Approval Webhooks).
+- **Day 7**: UI Polish (Glassmorphism, Real-time WebSockets, React Flow Dependency Map).
+
+## Stack
+* **Backend**: Java 17, Spring Boot, Kafka, PostgreSQL, Neo4j, Testcontainers
+* **AI Worker**: Python, FastAPI, LangChain, OpenAI
+* **Frontend**: React 19, TypeScript, TailwindCSS, React Flow, Framer Motion
+
+## Getting Started
+Ensure Docker is running, then use `docker-compose up` (if configured) or run the individual services from their respective directories.-cause analysis.
 
 ## 🏗️ Architecture
 

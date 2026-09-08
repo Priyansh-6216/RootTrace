@@ -1,105 +1,92 @@
-import { Activity, Server, ShieldAlert, Cpu, Plus } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useState } from 'react';
+import { IncidentFeed } from '../components/IncidentFeed';
+import { ServiceMap } from '../components/ServiceMap';
+import { RcaView } from '../components/RcaView';
+import { ApprovalModal } from '../components/ApprovalModal';
+import { ShieldAlert, PlayCircle } from 'lucide-react';
 
-const data = [
-  { name: '10:00', errors: 4, latency: 120 },
-  { name: '11:00', errors: 3, latency: 132 },
-  { name: '12:00', errors: 10, latency: 400 },
-  { name: '13:00', errors: 2, latency: 110 },
-  { name: '14:00', errors: 5, latency: 150 },
-  { name: '15:00', errors: 8, latency: 180 },
-];
+export default function Dashboard() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [status, setStatus] = useState<'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING');
 
-const StatCard = ({ icon: Icon, label, value, trend, color }: any) => (
-  <div className="glass-card p-6 flex flex-col gap-4">
-    <div className="flex items-center justify-between">
-      <div className={`p-3 rounded-xl bg-${color}-500/20 text-${color}-400`}>
-        <Icon size={24} />
-      </div>
-      <span className={`text-xs font-bold px-2 py-1 rounded-full bg-${trend > 0 ? 'red' : 'emerald'}-500/10 text-${trend > 0 ? 'red' : 'emerald'}-400`}>
-        {trend > 0 ? '+' : ''}{trend}%
-      </span>
-    </div>
-    <div>
-      <p className="text-slate-400 text-sm font-medium">{label}</p>
-      <h3 className="text-2xl font-bold text-white mt-1">{value}</h3>
-    </div>
-  </div>
-);
+  const handleApprove = () => {
+    setStatus('APPROVED');
+    setIsModalOpen(false);
+    // In real implementation, this triggers the POST /api/v1/remediations/{id}/approve
+  };
 
-const Dashboard = () => {
+  const handleReject = (reason: string) => {
+    console.log("Rejected:", reason);
+    setStatus('REJECTED');
+    setIsModalOpen(false);
+    // In real implementation, this triggers the POST /api/v1/remediations/{id}/reject
+  };
+
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">System Overview</h1>
-          <p className="text-slate-400 mt-1">Real-time health monitoring and incident detection.</p>
-        </div>
-        <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-indigo-500/20">
-          <Plus size={20} />
-          <span>Upload Logs</span>
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard icon={Activity} label="Total Requests" value="1.2M" trend={-2} color="indigo" />
-        <StatCard icon={ShieldAlert} label="Active Incidents" value="12" trend={15} color="red" />
-        <StatCard icon={Server} label="Healthy Services" value="42/45" trend={-1} color="emerald" />
-        <StatCard icon={Cpu} label="Avg. Latency" value="145ms" trend={5} color="amber" />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 glass-card p-6">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-lg font-bold text-white">Error Rate vs Latency</h3>
-            <select className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-slate-300 focus:outline-none">
-              <option>Last 24 hours</option>
-              <option>Last 7 days</option>
-            </select>
+    <div className="h-screen w-full bg-[#0f172a] text-slate-200 p-4 lg:p-6 overflow-hidden flex flex-col gap-6">
+      <header className="flex justify-between items-center bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 backdrop-blur-md shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="bg-indigo-600 p-2 rounded-lg shadow-[0_0_15px_rgba(79,70,229,0.5)]">
+            <ShieldAlert className="w-6 h-6 text-white" />
           </div>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data}>
-                <defs>
-                  <linearGradient id="colorErrors" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #ffffff10', borderRadius: '12px' }}
-                  itemStyle={{ color: '#f1f5f9' }}
-                />
-                <Area type="monotone" dataKey="errors" stroke="#f43f5e" fillOpacity={1} fill="url(#colorErrors)" strokeWidth={3} />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-white leading-tight">RootTrace</h1>
+            <p className="text-xs text-indigo-300 font-medium tracking-wide uppercase">Production V2</p>
           </div>
         </div>
-
-        <div className="glass-card p-6">
-          <h3 className="text-lg font-bold text-white mb-6">Recent Incidents</h3>
-          <div className="space-y-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-all cursor-pointer group">
-                <div className="flex items-start justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-red-400">Critical</span>
-                  <span className="text-xs text-slate-500">2m ago</span>
-                </div>
-                <h4 className="text-sm font-bold text-slate-200 group-hover:text-indigo-400 transition-colors">Payment Service Timeout</h4>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-1">Cascading failure in fraud-detection-service...</p>
-              </div>
-            ))}
+        
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg border border-slate-700">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </span>
+            <span className="text-sm font-medium text-slate-300">System Healthy</span>
           </div>
-          <button className="w-full mt-6 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">
-            View All Incidents
+          
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="glass-button flex items-center gap-2"
+          >
+            <PlayCircle className="w-5 h-5" />
+            Review Remediation
           </button>
         </div>
+      </header>
+
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-0">
+        <div className="lg:col-span-3 h-full min-h-0">
+          <IncidentFeed />
+        </div>
+        
+        <div className="lg:col-span-6 h-full min-h-0 flex flex-col gap-6">
+          <div className="flex-1 min-h-0">
+            <ServiceMap />
+          </div>
+          <div className="h-24 glass-panel flex items-center justify-between px-6 shrink-0 bg-slate-800/80">
+            <div>
+              <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Status</h3>
+              <div className="flex items-center gap-2">
+                <span className={`w-2.5 h-2.5 rounded-full ${status === 'PENDING' ? 'bg-amber-500' : status === 'APPROVED' ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                <span className="text-lg font-bold text-white">
+                  {status === 'PENDING' ? 'Awaiting Human Approval' : status === 'APPROVED' ? 'Remediation Applying...' : 'Remediation Rejected'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-3 h-full min-h-0">
+          <RcaView />
+        </div>
       </div>
+
+      <ApprovalModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onApprove={handleApprove}
+        onReject={handleReject}
+      />
     </div>
   );
-};
-
-export default Dashboard;
+}
